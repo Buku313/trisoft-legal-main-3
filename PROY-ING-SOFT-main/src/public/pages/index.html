@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Explora nuestros eventos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="navbar">
+            <a href="index.html" class="home-logo">
+                <img src="../assets/images/logo5.png" alt="Home Logo" width="25%"/>
+            </a>
+            <div class="nav-links">
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <span id="userName"></span>
+                    <button class="logout-button" onclick="logoutUser()">Cerrar Sesión</button>
+                </div>
+                <button id="loginButton" class="link-button" onclick="window.location.href='login.html'">ACCEDER</button>
+                <button id="usButton" class="link-button" onclick="window.location.href='nosotros.html'">NOSOTROS</button>
+                <button id="aboutButton" class="link-button" onclick="window.location.href='acercaDe.html'">ACERCA DE</button>
+                <button class="link-button" onclick="openAdminModal()">PANEL ADMIN</button>
+                <button class="link-button" id="adminLink" style="display: none;" onclick="openReservationsModal()">VER RESERVAS</button>
+            </div>
+        </header>
+    </div>
+
+    <div class="hero">
+        <h1>Bienvenido a Nuestra Plataforma de Eventos</h1>
+        <p>Descubre los mejores eventos en música, arte, gastronomía y entretenimiento</p>
+        <div class="search-section">
+            <div class="search-container">
+                <input id="searchBar" class="search-box" type="text" placeholder="Buscar evento:" oninput="filterEvents()">
+                <select id="categoryFilter" class="filter-box" onchange="filterEvents()">
+                    <option value="">Todas las categorías</option>
+                    <option value="Music">Música</option>
+                    <option value="Art">Arte</option>
+                    <option value="Food">Comida</option>
+                    <option value="Entertainment">Entretenimiento</option>
+                    <option value="Other">Otro</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Event Button -->
+    <button class="create-event-button" id="adminLink" onclick="openCreateEventModal()">CREAR EVENTO</button>
+
+
+    <section id="eventsContainer" class="event-grid">
+        <!-- Event cards will be dynamically injected here -->
+    </section>
+
+    <footer class="footer">
+        <div class="footer-icons">
+            <a href="https://www.facebook.com/"><img src="../assets/images/facebook.webp" alt="Facebook"></a>
+            <a href="https://www.instagram.com/"><img src="../assets/images/instagram.webp" alt="Instagram"></a>
+            <a href="https://x.com/home"><img src="../assets/images/x.webp" alt="Twitter"></a>
+        </div>
+        <div class="footer-text">
+            © 2024 DevsUc./ DEV313!!! Todos los derechos reservados.
+        </div>
+    </footer>
+
+    <!-- Reservation Modal -->
+    <div id="reservationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Confirmar Reserva</h2>
+            
+            <div class="reservation-details">
+                <h3 id="reservationEventTitle"></h3>
+                <div class="user-details">
+                    <p>Reservando como:</p>
+                    <p class="user-name" id="reservationUserName"></p>
+                    <p class="user-email" id="reservationUserEmail"></p>
+                </div>
+            </div>
+
+            <form id="reservationForm" onsubmit="reserveTicket(event)">
+                <input type="hidden" id="eventId" name="eventId">
+                <button type="submit" class="confirm-button">Confirmar Reserva</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Access Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdminModal()">&times;</span>
+            <h2>Acceso de Administrador</h2>
+            <form id="adminForm" onsubmit="authenticateAdmin(event)">
+                <label for="adminPassword">Contraseña:</label>
+                <input type="password" id="adminPassword" name="adminPassword" required>
+                <button type="submit">Acceder</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reservations Modal -->
+    <div id="reservationsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReservationsModal()">&times;</span>
+            <h2>Reservas Realizadas</h2>
+            <div id="reservationsList"></div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeConfirmationModal()">&times;</span>
+            <h2>Confirmación de Reserva</h2>
+            <p id="confirmationMessage"></p>
+        </div>
+    </div>
+
+    <!-- Create Event Modal -->
+    <div id="createEventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateEventModal()">&times;</span>
+            <h2>Crear Nuevo Evento</h2>
+            <form id="createEventForm" onsubmit="createEvent(event)" novalidate>
+                <div class="form-group">
+                    <label for="eventTitle">Título del Evento:</label>
+                    <input type="text" 
+                           id="eventTitle" 
+                           name="eventTitle" 
+                           required 
+                           pattern="[A-Za-z0-9 ]{3,50}"
+                           title="3-50 characters, alphanumeric only">
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <label for="eventDate">Fecha:</label>
+                <input type="date" id="eventDate" name="eventDate" required>
+
+                <label for="eventLocation">Ubicación:</label>
+                <input type="text" id="eventLocation" name="eventLocation" required>
+
+                <label for="eventCategory">Categoría:</label>
+                <select id="eventCategory" name="eventCategory" required>
+                    <option value="Music">Música</option>
+                    <option value="Art">Arte</option>
+                    <option value="Food">Comida</option>
+                    <option value="Entertainment">Entretenimiento</option>
+                    <option value="Other">Otro</option>
+                </select>
+
+                <label for="eventImage">URL de la Imagen:</label>
+                <input type="text" id="eventImage" name="eventImage" placeholder="assets/images/tu-imagen.jpg">
+
+                <button type="submit">Crear Evento</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Link de JavaScript -->
+    <script src="../js/auth.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        // 1. Proper Local Storage Management
+        const localStorageManager = {
+            getEvents() {
+                return JSON.parse(localStorage.getItem('events')) || [];
+            },
+            
+            setEvents(events) {
+                localStorage.setItem('events', JSON.stringify(events));
+            },
+            
+            getReservations() {
+                return JSON.parse(localStorage.getItem('reservations')) || [];
+            },
+            
+            setReservations(reservations) {
+                localStorage.setItem('reservations', JSON.stringify(reservations));
+            }
+        };
+
+        // 2. User Authentication System
+        const userAuth = {
+            users: JSON.parse(localStorage.getItem('users')) || [],
+            
+            register(userData) {
+                // Add validation and password hashing
+                if(this.users.find(u => u.email === userData.email)) {
+                    throw new Error('Email already registered');
+                }
+                this.users.push({
+                    ...userData,
+                    id: Date.now().toString(),
+                    createdAt: new Date()
+                });
+                localStorage.setItem('users', JSON.stringify(this.users));
+            },
+            
+            login(email, password) {
+                const user = this.users.find(u => 
+                    u.email === email && u.password === password
+                );
+                if(!user) throw new Error('Invalid credentials');
+                
+                // Create session
+                const session = {
+                    userId: user.id,
+                    token: Math.random().toString(36).substring(2),
+                    expires: new Date(Date.now() + 24*60*60*1000)
+                };
+                localStorage.setItem('session', JSON.stringify(session));
+                return session;
+            }
+        };
+
+        // 3. Event Management
+        class Event {
+            constructor(data) {
+                this.validate(data);
+                Object.assign(this, data);
+            }
+            
+            validate(data) {
+                const required = ['title', 'date', 'location', 'category'];
+                required.forEach(field => {
+                    if(!data[field]) throw new Error(`${field} is required`);
+                });
+                
+                // Validate date is in future
+                if(new Date(data.date) <= new Date()) {
+                    throw new Error('Event date must be in the future');
+                }
+            }
+        }
+
+        // 4. Reservation System
+        class Reservation {
+            constructor(data) {
+                this.validate(data);
+                this.id = Date.now().toString();
+                this.createdAt = new Date();
+                Object.assign(this, data);
+            }
+            
+            validate(data) {
+                if(!data.eventId || !data.userId || !data.name) {
+                    throw new Error('Missing required reservation data');
+                }
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessages');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+        }
+
+        function showLoading(isLoading) {
+            document.getElementById('loadingSpinner').style.display = 
+                isLoading ? 'block' : 'none';
+        }
+
+        function checkAuth() {
+            const session = JSON.parse(localStorage.getItem('session'));
+            if(!session || new Date(session.expires) <= new Date()) {
+                window.location.href = '/login.html';
+                return false;
+            }
+            return true;
+        }
+
+        function reserveTicket(event) {
+            event.preventDefault();
+            if(!checkAuth()) return;
+            
+            const eventId = document.getElementById('eventId').value;
+            const eventDetail = events.find(e => e.id === eventId);
+            
+            if(eventDetail.reservations >= eventDetail.capacity) {
+                showError('Event is fully booked');
+                return;
+            }
+            // Continue with reservation...
+        }
+    </script>
+</body>
+</html>

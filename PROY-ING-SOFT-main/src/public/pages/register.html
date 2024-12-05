@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../css/style.css" rel="stylesheet">
+    <title>Registro</title>
+</head>
+<body>
+    <div class="container">
+        <header class="navbar">
+            <a href="index.html" class="home-logo">
+                <img src="../assets/images/logo5.png" alt="Home Logo" width="25%"/>
+            </a>
+            <div class="nav-links">
+                <button style="margin-right:100px" id="backButton" class="link-button" onclick="window.location.href='index.html'">VOLVER</button>
+                <button id="usButton" class="link-button" onclick="window.location.href='nosotros.html'">NOSOTROS</button>
+                <button id="aboutButton" class="link-button" onclick="window.location.href='acercaDe.html'">ACERCA DE</button>
+            </div>
+        </header>
+
+        <main class="register-section">
+            <div class="register-box">
+                <h1>Registrarse</h1>
+                <form id="registerForm" onsubmit="registerUser(event)">
+                    <div class="input-box">
+                        <input type="text" id="registerName" placeholder="Nombre" required>
+                        <br>
+                        <input type="text" id="registerLastName" placeholder="Apellido" required>
+                        <br>
+                        <input type="text" id="registerIdNumber" placeholder="Cédula" required>
+                        <br>
+                        <input type="email" id="registerEmail" placeholder="Correo electrónico" required>
+                        <br>
+                        <input type="password" id="registerPassword" placeholder="Contraseña" required>
+                        <br>
+                    </div>
+                    <div id="registerMessage" class="message-box"></div>
+                    <button type="submit" class="register-button">Registrarse</button>
+                </form>
+                <p>¿Ya tiene una cuenta? <button class="register-button" onclick="window.location.href='login.html'">Inicie sesión</button></p>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-icons">
+                <a href="https://www.facebook.com/"><img src="../assets/images/facebook.webp" alt="Facebook"></a>
+                <a href="https://www.instagram.com/"><img src="../assets/images/instagram.webp" alt="Instagram"></a>
+                <a href="https://x.com/home"><img src="../assets/images/x.webp" alt="Twitter"></a>
+            </div>
+            <div class="footer-text">© 2024 Elaborada por DevsUc. Todos los derechos reservados.</div>
+        </footer>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

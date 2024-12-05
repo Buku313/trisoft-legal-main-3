@@ -1,0 +1,42 @@
+[
+{
+    "id": "event1",
+    "title": "Concierto de Rock",
+    "date": "2024-05-20",
+    "location": "Madrid",
+    "category": "Music",
+    "image": "https://shorturl.at/OQ5dJ"
+},
+{
+    "id": "event2",
+    "title": "Exposición de Arte Moderno",
+    "date": "2024-06-15",
+    "location": "Barcelona",
+    "category": "Art",
+    "image": "https://shorturl.at/hcfBO"
+},
+{
+    "id": "event3",
+    "title": "Festival Gastronómico",
+    "date": "2024-07-10",
+    "location": "Sevilla",
+    "category": "Food",
+    "image": "https://shorturl.at/m5dwN"
+},
+{
+    "id": "event4",
+    "title": "Espectáculo de Magia",
+    "date": "2024-08-05",
+    "location": "Valencia",
+    "category": "Entertainment",
+    "image": "https://shorturl.at/PsY7D"
+},
+{
+    "id": "event5",
+    "title": "Feria de Libros",
+    "date": "2024-09-12",
+    "location": "Bilbao",
+    "category": "Other",
+    "image": "https://shorturl.at/dHUx8"
+}
+]
