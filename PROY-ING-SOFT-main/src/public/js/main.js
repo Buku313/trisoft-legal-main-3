@@ -1,5 +1,7 @@
 // main.js
-let events = JSON.parse(localStorage.getItem('events')) || [
+
+// Default data
+const defaultEvents = [
     {
         "id": "event1",
         "title": "Concierto de Rock",
@@ -28,7 +30,7 @@ let events = JSON.parse(localStorage.getItem('events')) || [
         "id": "event4",
         "title": "Espectáculo de Magia",
         "date": "2024-08-05",
-        "location": "Valencia", 
+        "location": "Valencia",
         "category": "Entertainment",
         "image": "https://shorturl.at/PsY7D"
     },
@@ -42,15 +44,17 @@ let events = JSON.parse(localStorage.getItem('events')) || [
     }
 ];
 
-
-
+// Global state
+let events = JSON.parse(localStorage.getItem('events')) || defaultEvents;
 let reservations = JSON.parse(localStorage.getItem('reservations')) || [];
 let isAdmin = false;
 
+// Event Display Functions
 function displayEvents(eventsToDisplay) {
     const eventsContainer = document.getElementById('eventsContainer');
+    if (!eventsContainer) return;
+    
     eventsContainer.innerHTML = '';
-
     eventsToDisplay.forEach(event => {
         const eventCard = document.createElement('div');
         eventCard.classList.add('event-card');
@@ -60,49 +64,60 @@ function displayEvents(eventsToDisplay) {
             <p>Fecha: ${event.date}</p>
             <p>Ubicación: ${event.location}</p>
             <p>Categoría: ${event.category}</p>
-            <button onclick="openModal('${event.id}')">Reservar Ticket</button>
+            <button onclick="openModal('reservationModal', '${event.id}')">Reservar Ticket</button>
         `;
         eventsContainer.appendChild(eventCard);
     });
 }
 
-function filterEvents() {
-    const searchTerm = document.getElementById('searchBar').value.toLowerCase();
-    const selectedCategory = document.getElementById('categoryFilter').value;
+function validateEventForm() {
+    const title = document.getElementById('eventTitle').value;
+    const date = document.getElementById('eventDate').value;
+    const location = document.getElementById('eventLocation').value;
 
-    const filteredEvents = events.filter(event => {
-        const matchesSearch = event.title.toLowerCase().includes(searchTerm);
-        const matchesCategory = selectedCategory === '' || event.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
+    if (!title || !date || !location) {
+        alert('Por favor complete todos los campos requeridos');
+        return false;
+    }
 
-    displayEvents(filteredEvents);
+    if (new Date(date) <= new Date()) {
+        alert('La fecha del evento debe ser futura');
+        return false;
+    }
+
+    return true;
 }
 
-function openModal(eventId) {
-    const currentUser = userManager.getCurrentUser();
-    const eventDetail = events.find(e => e.id === eventId);
-    
-    if (!userManager.isAuthenticated()) {
-        alert('Por favor inicie sesión para reservar');
-        return;
-    }
+function createEvent(event) {
+    event.preventDefault(); // Prevent the default form submission
+    if (!validateEventForm()) return;
 
-    if (!eventDetail) {
-        alert('Evento no encontrado');
-        return;
-    }
+    const formData = {
+        id: Date.now().toString(),
+        title: document.getElementById('eventTitle').value,
+        date: document.getElementById('eventDate').value,
+        location: document.getElementById('eventLocation').value,
+        category: document.getElementById('eventCategory').value,
+        image: document.getElementById('eventImage').value || 'https://shorturl.at/dHUx8'
+    };
 
-    document.getElementById('reservationEventTitle').textContent = eventDetail.title;
-    document.getElementById('reservationUserName').textContent = `${currentUser.name} ${currentUser.lastName}`;
-    document.getElementById('reservationUserEmail').textContent = currentUser.email;
-    document.getElementById('eventId').value = eventId;
-    document.getElementById('reservationModal').style.display = 'block';
+    events.push(formData);
+    localStorage.setItem('events', JSON.stringify(events));
+    displayEvents(events);
+    closeModal('createEventModal');
+    document.getElementById('createEventForm').reset();
+    alert('Evento creado exitosamente!');
 }
 
 function reserveTicket(event) {
     event.preventDefault();
+    
     const currentUser = userManager.getCurrentUser();
+    if (!currentUser) {
+        alert('Debe iniciar sesión para reservar un evento.');
+        return;
+    }
+
     const eventId = document.getElementById('eventId').value;
     const eventDetail = events.find(e => e.id === eventId);
 
@@ -136,87 +151,65 @@ function reserveTicket(event) {
         </div>
     `;
 
-    document.getElementById('reservationModal').style.display = 'none';
-    document.getElementById('confirmationModal').style.display = 'block';
+    closeModal('reservationModal');
+    openModal('confirmationModal');
 }
 
-// Modal Functions
-function closeModal() {
-    document.getElementById('reservationModal').style.display = 'none';
-}
-
-function closeConfirmationModal() {
-    document.getElementById('confirmationModal').style.display = 'none';
-}
-
-function openAdminModal() {
-    document.getElementById('adminModal').style.display = 'block';
-}
-
-function closeAdminModal() {
-    document.getElementById('adminModal').style.display = 'none';
-}
-
-function authenticateAdmin(event) {
-    event.preventDefault();
-    const password = document.getElementById('adminPassword').value;
-    if (password === "admin") {
-        isAdmin = true;
-        document.getElementById('adminLink').style.display = 'inline-block';
-        closeAdminModal();
-    } else {
-        alert("Contraseña incorrecta. No tienes acceso a las funciones de administrador.");
-    }
-}
-
-function openReservationsModal() {
-    const reservationsList = document.getElementById('reservationsList');
-    reservationsList.innerHTML = '';
-
-    if (reservations.length === 0) {
-        reservationsList.innerHTML = '<p>No hay reservas realizadas.</p>';
-    } else {
-        reservations.forEach(reservation => {
-            const event = events.find(e => e.id === reservation.eventId);
-            if (event) {
-                const reservationItem = document.createElement('div');
-                reservationItem.innerHTML = `
-                    <p>Nombre: ${reservation.name}</p>
-                    <p>Evento: ${event.title}</p>
-                    <hr>
-                `;
-                reservationsList.appendChild(reservationItem);
+// Generic Modal Management Functions
+function openModal(modalId, eventId = null) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        if (eventId) {
+            const eventDetail = events.find(e => e.id === eventId);
+            if (eventDetail) {
+                document.getElementById('reservationEventTitle').textContent = eventDetail.title;
+                const currentUser = userManager.getCurrentUser();
+                document.getElementById('reservationUserName').textContent = `${currentUser.name} ${currentUser.lastName}`;
+                document.getElementById('reservationUserEmail').textContent = currentUser.email;
+                document.getElementById('eventId').value = eventId;
             }
-        });
-    }
-
-    document.getElementById('reservationsModal').style.display = 'block';
-}
-
-function closeReservationsModal() {
-    document.getElementById('reservationsModal').style.display = 'none';
-}
-
-function openCreateEventModal() {
-    const modal = document.getElementById("createEventModal");
-    if (modal) {
-        modal.style.display = "block";
+        }
     } else {
-        console.error("Modal 'createEventModal' no encontrado.");
+        console.error(`Modal '${modalId}' no encontrado.`);
     }
 }
 
-function closeCreateEventModal() {
-    const modal = document.getElementById("createEventModal");
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
     if (modal) {
-        modal.style.display = "none";
+        modal.style.display = 'none';
     } else {
-        console.error("Modal 'createEventModal' no encontrado.");
+        console.error(`Modal '${modalId}' no encontrado.`);
     }
 }
 
-// Initialize
-window.onload = function() {
-    displayEvents(events);
+function displayReservations() {
+    const reservationsList = document.getElementById('reservationsList');
+    if (!reservationsList) return;
+
+    reservationsList.innerHTML = '';
+    reservations.forEach(reservation => {
+        const reservationItem = document.createElement('div');
+        reservationItem.classList.add('reservation-item');
+        reservationItem.innerHTML = `
+            <p><strong>Evento:</strong> ${reservation.eventTitle}</p>
+            <p><strong>Fecha:</strong> ${reservation.eventDate}</p>
+            <p><strong>Reservado por:</strong> ${reservation.name}</p>
+            <p><strong>ID Reserva:</strong> ${reservation.id}</p>
+        `;
+        reservationsList.appendChild(reservationItem);
+    });
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', () => {
     userManager.checkLoginStatus();
-};
+    displayEvents(events);
+
+    // Attach event listener to the create event button
+    document.getElementById('createEventButton').addEventListener('click', () => openModal('createEventModal'));
+
+    // Attach event listener to the create event form
+    document.getElementById('createEventForm').addEventListener('submit', createEvent);
+});

@@ -4,21 +4,14 @@ const userManager = {
 
     registerUser(userData) {
         if (this.users.find(u => u.email === userData.email)) {
-            throw new Error('Email ya registrado');
+            throw new Error('Email already registered');
         }
-        if (this.users.find(u => u.idNumber === userData.idNumber)) {
-            throw new Error('Cédula ya registrada');
-        }
-
-        const newUser = {
-            id: Date.now().toString(),
+        this.users.push({
             ...userData,
+            id: Date.now().toString(),
             createdAt: new Date()
-        };
-
-        this.users.push(newUser);
+        });
         localStorage.setItem('users', JSON.stringify(this.users));
-        return newUser;
     },
 
     loginUser(email, password) {
@@ -38,6 +31,7 @@ const userManager = {
         };
 
         localStorage.setItem('currentSession', JSON.stringify(session));
+        localStorage.setItem('isAdmin', user.isAdmin || false); // Store admin status
         return session;
     },
 
@@ -106,7 +100,8 @@ function registerUser(event) {
             lastName: document.getElementById('registerLastName').value,
             idNumber: document.getElementById('registerIdNumber').value,
             email: document.getElementById('registerEmail').value,
-            password: document.getElementById('registerPassword').value
+            password: document.getElementById('registerPassword').value,
+            isAdmin: document.getElementById('registerIsAdmin').checked // Add admin checkbox
         };
 
         userManager.registerUser(userData);
@@ -122,9 +117,23 @@ function logoutUser() {
     userManager.logout();
 }
 
-// Initialize auth check
-window.addEventListener('load', () => {
-    if (userManager && typeof userManager.checkLoginStatus === 'function') {
-        userManager.checkLoginStatus();
+function checkLoginStatus() {
+    const currentUser = userManager.getCurrentUser();
+    const loginButton = document.getElementById('loginButton');
+    const userInfo = document.getElementById('userInfo');
+    const userName = document.getElementById('userName');
+    const adminLink = document.getElementById('adminLink');
+    
+    if (currentUser) {
+        loginButton.style.display = 'none';
+        userInfo.style.display = 'flex';
+        userName.textContent = `${currentUser.name} ${currentUser.lastName}`;
+        if (localStorage.getItem('isAdmin') === 'true') {
+            adminLink.style.display = 'inline-block';
+        }
+    } else {
+        loginButton.style.display = 'inline-block';
+        userInfo.style.display = 'none';
+        adminLink.style.display = 'none';
     }
-});
+}

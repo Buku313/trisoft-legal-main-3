@@ -37,6 +37,35 @@
           
         </main>
         
+        <!-- Reservation Modal -->
+        <div id="reservationModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Confirmar Reserva</h2>
+                <div class="reservation-details">
+                    <h3 id="reservationEventTitle"></h3>
+                    <div class="user-details">
+                        <p>Reservando como:</p>
+                        <p class="user-name" id="reservationUserName"></p>
+                        <p class="user-email" id="reservationUserEmail"></p>
+                    </div>
+                </div>
+                <form id="reservationForm" onsubmit="reserveTicket(event)">
+                    <input type="hidden" id="eventId" name="eventId">
+                    <button type="submit" class="confirm-button">Confirmar Reserva</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmationModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeConfirmationModal()">&times;</span>
+                <h2>Confirmación de Reserva</h2>
+                <p id="confirmationMessage"></p>
+            </div>
+        </div>
+
         <footer class="footer">
             <div class="footer-icons">
                 <a href="https://www.facebook.com/"><img src="../assets/images/facebook.webp" alt="Facebook"></a>
@@ -49,5 +78,32 @@
 
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            displayEvents(events);
+        });
+
+        function checkLoginStatus() {
+            const currentUser = userManager.getCurrentUser();
+            const loginButton = document.getElementById('loginButton');
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+            const adminLink = document.getElementById('adminLink');
+            
+            if (currentUser) {
+                loginButton.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userName.textContent = `${currentUser.name} ${currentUser.lastName}`;
+                if (localStorage.getItem('isAdmin') === 'true') {
+                    adminLink.style.display = 'inline-block';
+                }
+            } else {
+                loginButton.style.display = 'inline-block';
+                userInfo.style.display = 'none';
+                adminLink.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
